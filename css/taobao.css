@@ -1,0 +1,24 @@
+* {
+    margin: 0;
+    padding: 0;
+}
+
+ul,
+ol {
+    list-style: none;
+}
+
+.focus-box {
+    width: 500px;
+    height: 444px;
+}
+
+.focus-box ul {
+    width: calc(500*4px)
+}
+
+li {
+    width: 500px;
+    height: 444px;
+    float: left;
+}

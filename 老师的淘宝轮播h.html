@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+        }
+        
+        ul,
+        ol {
+            list-style: none;
+        }
+        
+        #focus-box {
+            position: relative;
+            width: 700px;
+            height: 440px;
+            overflow: hidden;
+        }
+        
+        #focus-box ul {
+            position: absolute;
+            left: 0px;
+            top: 0;
+            width: 4200px;
+            height: 440px;
+        }
+        
+        #focus-box ul li {
+            float: left;
+        }
+        
+        #focus-box img {
+            top: 0;
+            left: 0;
+            width: 700px;
+            height: 440px;
+        }
+        
+        #focus-box span {
+            z-index: 10;
+            position: absolute;
+            top: 50%;
+            width: 25px;
+            height: 35px;
+            color: white;
+            font: bold 20px/35px Microsoft Yahei;
+            background-color: rgba(0, 0, 0, 0.4);
+            cursor: pointer;
+        }
+        
+        #focus-box span:nth-child(1) {
+            left: 0;
+            border-radius: 0 35px 35px 0;
+        }
+        
+        #focus-box span:nth-child(2) {
+            right: 0;
+            border-radius: 35px 0 0 35px;
+        }
+        
+        #focus-box span:hover {
+            background-color: rgba(0, 0, 0, 0.8);
+        }
+        
+        #focus-box ol {
+            z-index: 10;
+            position: absolute;
+            left: 80px;
+            bottom: 15px;
+        }
+        
+        #focus-box ol li {
+            float: left;
+            width: 11px;
+            height: 11px;
+            margin-right: 4px;
+            border-radius: 11px;
+            background-color: #f00;
+            opacity: 0.5;
+            cursor: pointer;
+        }
+        
+        #focus-box ol li:hover,
+        #focus-box ol li.active {
+            opacity: 1;
+        }
+    </style>
+
+</head>
+
+<body>
+    <div id="focus-box">
+        <span>&lt;</span>
+        <span>&gt;</span>
+        <ul>
+            <li>
+                <a href="">
+                    <img src="./images/1.jpg" alt="" class="active">
+                </a>
+            </li>
+            <li>
+                <a href="">
+                    <img src="./images/2.jpg" alt="">
+                </a>
+            </li>
+            <li>
+                <a href="">
+                    <img src="./images/3.jpg" alt="">
+                </a>
+            </li>
+            <li>
+                <a href="">
+                    <img src="./images/4.jpg" alt="">
+                </a>
+            </li>
+        </ul>
+        <ol></ol>
+    </div>
+</body>
+<script src="animate.js"></script>
+<script>
+    var focusBox = document.querySelector("#focus-box");
+    var imgs = focusBox.querySelectorAll("img");
+    var ol = focusBox.querySelector("ol");
+    var ul = focusBox.querySelector("ul");
+
+
+    // 1.根据图片数量生成小圆圈
+    for (var i = 0; i < imgs.length; i++) {
+        var li = document.createElement("li");
+        li.index = i;
+        if (i == 0) {
+            li.className = "active";
+        }
+        ol.appendChild(li);
+    }
+
+    var circles = ol.children;
+
+
+    // 2.鼠标划过小圆圈时切换到对应的图片
+    for (var n = 0; n < circles.length; n++) {
+        circles[n].onclick = function() {
+            var left = -this.index * focusBox.offsetWidth;　
+            animate(ul, left);
+            showCircle(this.index);
+        }
+    }
+
+    // 克隆第一张图片插入到ul中
+    var newImg = ul.children[0].cloneNode(true);
+    ul.appendChild(newImg);
+
+    // 节流阀
+    var flag = true;
+
+    // 3.点击左侧按钮切换到上一张图片
+    focusBox.querySelectorAll("span")[0].onclick = function() {
+        if (flag) {
+            flag = false;
+            //当前正在显示的图片索引
+            var index = ol.querySelector(".active").index;
+
+            if (index == 0) {
+                console.log(index);
+                ul.style.left = -imgs.length * focusBox.offsetWidth + 'px';
+                index = imgs.length - 1;
+            } else {
+                index--;
+            }
+            var left = ul.offsetLeft + focusBox.offsetWidth;
+            animate(ul, left, function() {
+                flag = true;
+            });
+            showCircle(index);
+        }
+
+    }
+
+    // 4.点击右侧按钮切换到下一张图片
+    focusBox.querySelectorAll("span")[1].onclick = function() {
+        if (flag) {
+            flag = false;
+            //当前正在显示的图片索引
+            var index = ol.querySelector(".active").index;
+            var left = ul.offsetLeft - focusBox.offsetWidth;
+
+            animate(ul, left, function() {
+                if (index == circles.length - 1) {
+                    ul.style.left = 0;
+                    index = 0;
+                } else {
+                    index++;
+                }
+                showCircle(index);
+
+                flag = true;
+            });
+        }
+
+    }
+
+    // 5.自动播放
+    // 7.鼠标经过焦点图大盒子继续自动播放
+    var timer = null;
+    window.onload = focusBox.onmouseout = function() {
+        timer = setInterval(function() {
+            focusBox.querySelectorAll("span")[1].onclick();
+        }, 1000)
+    }
+
+
+    // 6.鼠标经过焦点图大盒子停止自动播放
+    focusBox.onmouseover = function() {
+        clearInterval(timer);
+    };
+
+
+    // 根据索引让对应的小圆圈高亮
+    function showCircle(index) {
+        for (var i = 0; i < circles.length; i++) {
+            circles[i].className = "";
+        }
+        circles[index].className = "active"
+    }
+</script>
+
+</html>
